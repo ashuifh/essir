@@ -13,14 +13,34 @@ const App = () => {
 
   try {
     const res = await fetch(`/api/jobs?query=${encodeURIComponent(query)}`);
+    
+    // Log the response details for debugging
+    console.log('Response status:', res.status);
+    console.log('Response headers:', res.headers);
+    
     if (!res.ok) {
+      const errorText = await res.text();
+      console.log('Error response:', errorText);
       throw new Error('Failed to fetch jobs');
     }
 
-    const data = await res.json();
+    const responseText = await res.text();
+    console.log('Raw response:', responseText);
+    
+    // Try to parse as JSON
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('Failed to parse JSON:', parseError);
+      console.log('Response was not valid JSON:', responseText);
+      throw new Error('Server returned invalid JSON');
+    }
+    
     console.log('Jobs received from backend:', data); // or setJobs(data.jobs) if you have state for jobs
   } catch (error) {
     console.error('Search error:', error);
+    alert(`Search failed: ${error.message}`);
   } finally {
     setIsLoading(false);
   }
