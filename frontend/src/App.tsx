@@ -6,17 +6,26 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubscribing, setIsSubscribing] = useState(false);
 
-  const handleSearch = () => {
-    if (!query.trim()) return;
+ const handleSearch = async () => {
+  if (!query.trim()) return;
 
-    setIsLoading(true);
-    console.log('Searching for:', query);
+  setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-  };
+  try {
+    const res = await fetch(`/api/jobs?query=${encodeURIComponent(query)}`);
+    if (!res.ok) {
+      throw new Error('Failed to fetch jobs');
+    }
+
+    const data = await res.json();
+    console.log('Jobs received from backend:', data); // or setJobs(data.jobs) if you have state for jobs
+  } catch (error) {
+    console.error('Search error:', error);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   const handleSubscribe = () => {
     if (!email.trim()) return;
@@ -66,7 +75,7 @@ const App = () => {
         <button
           onClick={handleSubscribe}
           disabled={isSubscribing}
-          className="px-6 py-3 text-white transition bg-blue-500 rounded-r-md hover:bg-blue-600 disabled:opacity-50"
+          className="px-6 py-3 text-white transition bg-red-500 rounded-r-md hover:bg-red-600 disabled:opacity-50"
         >
           {isSubscribing ? 'Subscribing...' : 'Subscribe'}
         </button>
