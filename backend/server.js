@@ -1,46 +1,49 @@
 import express from 'express';
 import axios from 'axios';
+import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
+
+dotenv.config(); // Load .env variables
+
 const app = express();
 const port = 3000;
 
+app.use(express.json()); // For parsing JSON bodies
+
+// GET job details
 app.get('/job-details', async (req, res) => {
-  const job_id = req.query.job_id || 'n20AgUu1KG0BGjzoAAAAAA=='; // Get job_id from query params or default
+  const job_id = req.query.job_id || 'n20AgUu1KG0BGjzoAAAAAA==';
   const country = req.query.country || 'us';
 
-  const options = {
-    method: 'GET',
-    url: 'https://jsearch.p.rapidapi.com/job-details',
-    params: {
-      job_id: job_id,
-      country: country
-    },
-    headers: {
-        'x-rapidapi-key': '97ac430767mshbda8be4ec82efdfp1b9e09jsn2a89205a06c6',
-    'x-rapidapi-host': 'jsearch.p.rapidapi.com'
-    }
-  };
-
   try {
-    const response = await axios.request(options);
-    res.json(response.data);  // Send back API response to client
+    const response = await axios.get('https://jsearch.p.rapidapi.com/job-details', {
+      params: { job_id, country },
+      headers: {
+        'x-rapidapi-key': process.env.RAPIDAPI_KEY,
+        'x-rapidapi-host': 'jsearch.p.rapidapi.com',
+      },
+    });
+    res.json(response.data);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to fetch job details' });
   }
 });
+
+// GET jobs
 app.get('/api/jobs', async (req, res) => {
   const query = req.query.query || '';
   try {
     const response = await axios.get('https://jsearch.p.rapidapi.com/search', {
       params: {
-        query: query,
+        query,
         page: '1',
-        num_pages: '1'
+        num_pages: '1',
       },
       headers: {
-        'x-rapidapi-key': '97ac430767mshbda8be4ec82efdfp1b9e09jsn2a89205a06c6',
-        'x-rapidapi-host': 'jsearch.p.rapidapi.com'
-      }
+        'x-rapidapi-key': process.env.RAPIDAPI_KEY,
+        'x-rapidapi-host': 'jsearch.p.rapidapi.com',
+      },
     });
     res.json({ jobs: response.data.data });
   } catch (error) {
@@ -49,30 +52,29 @@ app.get('/api/jobs', async (req, res) => {
   }
 });
 
-
+// POST subscription email
 app.post('/api/subscribe', async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: 'Email is required' });
 
-  // Configure your SMTP credentials here
   const transporter = nodemailer.createTransport({
-    host: 'smtp.example.com', // replace with your SMTP host
-    port: 587,
-    secure: false,
+    service: 'gmail',
     auth: {
-      user: 'your@email.com',
-      pass: 'yourpassword'
+      user: process.env.EMAIL_USER,      
+      pass: process.env.EMAIL_PASS        
     }
   });
-try {
+
+  try {
     await transporter.sendMail({
-      from: '"Dream Job" <your@email.com>',
-      to: email,
+      from: `"Dream Job" <${process.env.EMAIL_USER}>`,
+      to: email, 
       subject: "You've subscribed to job alerts!",
-      text: "Thank you for subscribing to Dream Job alerts!"
+      text: `Thanks for subscribing to Dream Job alerts! We'll notify you with updates.`,
     });
     res.json({ message: 'Subscription confirmed. Email sent.' });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Failed to send email' });
   }
 });
