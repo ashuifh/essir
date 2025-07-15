@@ -62,20 +62,38 @@ const App = () => {
         </button>
       </div>
 
-     
-<div className="w-full max-w-2xl mt-8">
+    <div className="w-full max-w-2xl mt-8">
   {jobs.map((job) => (
     <div
       key={job.job_id || job.title}
-      className="p-4 mb-4 border rounded-lg cursor-pointer hover:bg-gray-100"
-      onClick={() => handleJobClick(job.job_id)}
+      className="relative p-4 mb-4 transition duration-200 border rounded-lg cursor-pointer group hover:bg-gray-100"
+      onClick={() => {
+        const link =
+          job.job_apply_link ||
+          (job.apply_options && job.apply_options[0]?.apply_link);
+        if (link) {
+          window.open(link, '_blank');
+        } else {
+          handleJobClick(job.job_id); 
+        }
+      }}
     >
-      <h2 className="text-xl font-semibold">{job.job_title || job.title}</h2>
+      <h2 className="text-xl font-semibold">
+        {job.job_title || job.title}
+      </h2>
       <p className="text-gray-600">{job.employer_name || job.company}</p>
-      <p className="text-sm text-gray-500">{job.job_city || job.location}, {job.job_country || ''}</p>
+      <p className="text-sm text-gray-500">
+        {job.job_city || job.location}, {job.job_country || ''}
+      </p>
+
+      {/* Hover Tooltip */}
+      <div className="absolute z-10 hidden px-2 py-1 text-xs text-white bg-black rounded top-2 right-2 group-hover:block">
+        Click to Apply
+      </div>
     </div>
   ))}
 </div>
+
 
       {/* Job Detail */}
       {selectedJob && (
