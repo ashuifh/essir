@@ -33,11 +33,24 @@ const App = () => {
   }
 };
 
-  const handleSubscribe = () => {
-    if (!email.trim()) return;
-    setIsSubscribing(true);
-    setTimeout(() => setIsSubscribing(false), 1000);
-  };
+  const handleSubscribe = async () => {
+  if (!email.trim()) return;
+  setIsSubscribing(true);
+  try {
+    const res = await fetch('/api/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    // Optionally show a success message
+    alert(data.message || 'Subscribed!');
+  } catch (error) {
+    alert('Subscription failed');
+  } finally {
+    setIsSubscribing(false);
+  }
+};
 
   return (
     <div className="flex flex-col items-center min-h-screen px-4 text-gray-800 bg-gray-50">
@@ -74,7 +87,7 @@ const App = () => {
         if (link) {
           window.open(link, '_blank');
         } else {
-          handleJobClick(job.job_id); 
+          handleJobClick(job.job_id); // fallback to showing details
         }
       }}
     >

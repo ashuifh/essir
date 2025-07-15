@@ -49,6 +49,34 @@ app.get('/api/jobs', async (req, res) => {
   }
 });
 
+
+app.post('/api/subscribe', async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'Email is required' });
+
+  // Configure your SMTP credentials here
+  const transporter = nodemailer.createTransport({
+    host: 'smtp.example.com', // replace with your SMTP host
+    port: 587,
+    secure: false,
+    auth: {
+      user: 'your@email.com',
+      pass: 'yourpassword'
+    }
+  });
+try {
+    await transporter.sendMail({
+      from: '"Dream Job" <your@email.com>',
+      to: email,
+      subject: "You've subscribed to job alerts!",
+      text: "Thank you for subscribing to Dream Job alerts!"
+    });
+    res.json({ message: 'Subscription confirmed. Email sent.' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to send email' });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
