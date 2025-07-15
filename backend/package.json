@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "name": "backend",
   "version": "1.0.0",
   "type": "module",
@@ -13,3 +14,18 @@
   }
 }
 
+=======
+  "name": "job-search-backend",
+  "version": "1.0.0",
+  "description": "Backend API for job search application",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
+}
+>>>>>>> aa85e29c7aeac4d148e9834642dd6af029d54aa5
