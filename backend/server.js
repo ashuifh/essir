@@ -5,22 +5,22 @@ import dotenv from 'dotenv';
 import { Resend } from 'resend';
 import mongoose from 'mongoose';
 
-dotenv.config(); // Load .env variables
+dotenv.config(); 
 
 const app = express();
 const port = 3000;
 
-app.use(express.json()); // For parsing JSON bodies
+app.use(express.json());
 
-// ✅ MongoDB Connection
+//  MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log('✅ MongoDB connected'))
-.catch((err) => console.error('❌ MongoDB connection error:', err));
+.then(() => console.log(' MongoDB connected'))
+.catch((err) => console.error(' MongoDB connection error:', err));
 
-// ✅ MongoDB Schema
+// MongoDB Schema
 const subscriptionSchema = new mongoose.Schema({
   email: { type: String, required: true },
   query: { type: String, required: true },
@@ -79,10 +79,10 @@ app.post('/api/subscribe', async (req, res) => {
   if (!email || !query) return res.status(400).json({ error: 'Email and job query are required' });
 
   try {
-    // ✅ Save subscription in DB
+    //  Save subscription in DB
     await Subscription.create({ email, query });
 
-    // ✅ Send welcome email
+    //  yha pe email  send hoga
     await resend.emails.send({
       from: 'Dream Job <onboarding@resend.dev>',
       to: email,
@@ -96,7 +96,7 @@ app.post('/api/subscribe', async (req, res) => {
     res.status(500).json({ error: 'Failed to send email or store subscription' });
   }
 });
-
+//yha pe post port connect hoga
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
