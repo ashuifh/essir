@@ -4,24 +4,30 @@ import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import { Resend } from 'resend';
 import mongoose from 'mongoose';
+import cors from 'cors';
 
 dotenv.config(); 
 
 const app = express();
 const port = process.env.PORT || 3000;
 
+//  CORS Configuration
+app.use(cors({
+  origin: 'https://essir-voxe.vercel.app', // your frontend URL on Vercel
+  credentials: true,
+}));
 
 app.use(express.json());
 
-//  MongoDB Connection
+
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log(' MongoDB connected'))
-.catch((err) => console.error(' MongoDB connection error:', err));
+.then(() => console.log('MongoDB connected'))
+.catch((err) => console.error('MongoDB connection error:', err));
 
-// MongoDB Schema
+// ✅ MongoDB Schema
 const subscriptionSchema = new mongoose.Schema({
   email: { type: String, required: true },
   query: { type: String, required: true },
@@ -30,7 +36,7 @@ const subscriptionSchema = new mongoose.Schema({
 
 const Subscription = mongoose.model('Subscription', subscriptionSchema);
 
-// GET job details
+// ✅ Job Details Route
 app.get('/job-details', async (req, res) => {
   const job_id = req.query.job_id || 'n20AgUu1KG0BGjzoAAAAAA==';
   const country = req.query.country || 'us';
@@ -50,7 +56,7 @@ app.get('/job-details', async (req, res) => {
   }
 });
 
-// GET jobs
+// ✅ Job Search Route
 app.get('/api/jobs', async (req, res) => {
   const query = req.query.query || '';
   try {
@@ -72,7 +78,7 @@ app.get('/api/jobs', async (req, res) => {
   }
 });
 
-// POST subscription (updated to store in MongoDB)
+// ✅ Subscribe Route
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 app.post('/api/subscribe', async (req, res) => {
@@ -80,10 +86,10 @@ app.post('/api/subscribe', async (req, res) => {
   if (!email || !query) return res.status(400).json({ error: 'Email and job query are required' });
 
   try {
-    //  Save subscription in DB
+    // Save subscription in DB
     await Subscription.create({ email, query });
 
-    //  yha pe email  send hoga
+    // Send confirmation email
     await resend.emails.send({
       from: 'Dream Job <onboarding@resend.dev>',
       to: email,
@@ -97,10 +103,13 @@ app.post('/api/subscribe', async (req, res) => {
     res.status(500).json({ error: 'Failed to send email or store subscription' });
   }
 });
+
+// ✅ Root route
 app.get('/', (req, res) => {
-  res.send(' Dream Job API is running!');
+  res.send('Dream Job API is running!');
 });
-//yha pe post port connect hoga
+
+// ✅ Start Server
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
