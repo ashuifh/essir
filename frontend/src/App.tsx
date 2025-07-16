@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Search, MapPin, Building2, ExternalLink, X, Mail, Sparkles } from 'lucide-react';
 
+const BASE_URL = 'https://essir-7.onrender.com'; // 👈 Your backend URL
+
 const App = () => {
   const [query, setQuery] = useState('');
   const [email, setEmail] = useState('');
@@ -12,9 +14,8 @@ const App = () => {
   const handleSearch = async () => {
     if (!query.trim()) return;
     setIsLoading(true);
-
     try {
-      const res = await fetch(`/api/jobs?query=${encodeURIComponent(query)}`);
+      const res = await fetch(`${BASE_URL}/api/jobs?query=${encodeURIComponent(query)}`);
       const data = await res.json();
       setJobs(data.jobs || []);
     } catch (error) {
@@ -26,7 +27,7 @@ const App = () => {
 
   const handleJobClick = async (jobId: string) => {
     try {
-      const res = await fetch(`/job-details?job_id=${jobId}`);
+      const res = await fetch(`${BASE_URL}/job-details?job_id=${jobId}`);
       const data = await res.json();
       setSelectedJob(data.data?.[0] || null);
     } catch (error) {
@@ -38,7 +39,7 @@ const App = () => {
     if (!email.trim() || !query.trim()) return;
     setIsSubscribing(true);
     try {
-      const res = await fetch('/api/subscribe', {
+      const res = await fetch(`${BASE_URL}/api/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, query }),
@@ -55,14 +56,12 @@ const App = () => {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
-      {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute rounded-full -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 blur-3xl"></div>
         <div className="absolute rounded-full -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-cyan-400/20 to-blue-400/20 blur-3xl"></div>
       </div>
 
       <div className="relative z-10 flex flex-col items-center min-h-screen px-4 py-8">
-        {/* Header */}
         <div className="mb-12 text-center">
           <div className="flex items-center justify-center mb-4">
             <Sparkles className="w-8 h-8 mr-2 text-blue-500" />
@@ -76,7 +75,6 @@ const App = () => {
           </p>
         </div>
 
-        {/* Search Bar */}
         <div className="relative w-full max-w-2xl mb-12">
           <div className="relative flex items-center overflow-hidden bg-white border shadow-2xl rounded-2xl border-gray-200/50 backdrop-blur-sm">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-purple-50/50"></div>
@@ -108,7 +106,6 @@ const App = () => {
           </div>
         </div>
 
-        {/* Job List */}
         <div className="w-full max-w-4xl space-y-6">
           {jobs.map((job, index) => (
             <div
@@ -162,7 +159,6 @@ const App = () => {
           ))}
         </div>
 
-        {/* Job Detail Modal */}
         {selectedJob && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
             <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto animate-in fade-in duration-300">
@@ -228,7 +224,6 @@ const App = () => {
           </div>
         )}
 
-        {/* Subscription Section */}
         <div className="w-full max-w-2xl mt-16 mb-8">
           <div className="p-8 border shadow-xl bg-white/80 backdrop-blur-sm rounded-2xl border-gray-200/50">
             <div className="mb-6 text-center">
@@ -267,7 +262,7 @@ const App = () => {
           </div>
         </div>
       </div>
-      
+
       <style jsx>{`
         @keyframes fadeInUp {
           from {
@@ -279,7 +274,6 @@ const App = () => {
             transform: translateY(0);
           }
         }
-        
         @keyframes animate-in {
           from {
             opacity: 0;
@@ -290,7 +284,6 @@ const App = () => {
             transform: scale(1);
           }
         }
-        
         .animate-in {
           animation: animate-in 0.3s ease-out forwards;
         }
