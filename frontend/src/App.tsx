@@ -33,24 +33,25 @@ const App = () => {
   }
 };
 
-  const handleSubscribe = async () => {
-  if (!email.trim()) return;
+const handleSubscribe = async () => {
+  if (!email.trim() || !query.trim()) return; // both must be filled
   setIsSubscribing(true);
   try {
     const res = await fetch('/api/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, query }), //Now includes query
     });
     const data = await res.json();
-    // Optionally show a success message
     alert(data.message || 'Subscribed!');
   } catch (error) {
     alert('Subscription failed');
+    console.error('Subscription error:', error);
   } finally {
     setIsSubscribing(false);
   }
 };
+
 
   return (
     <div className="flex flex-col items-center min-h-screen px-4 text-gray-800 bg-gray-50">

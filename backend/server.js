@@ -2,6 +2,8 @@ import express from 'express';
 import axios from 'axios';
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
+import { Resend } from 'resend';
+import mongoose from 'mongoose';
 
 dotenv.config(); // Load .env variables
 
@@ -9,6 +11,23 @@ const app = express();
 const port = 3000;
 
 app.use(express.json()); // For parsing JSON bodies
+
+// ✅ MongoDB Connection
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log('✅ MongoDB connected'))
+.catch((err) => console.error('❌ MongoDB connection error:', err));
+
+// ✅ MongoDB Schema
+const subscriptionSchema = new mongoose.Schema({
+  email: { type: String, required: true },
+  query: { type: String, required: true },
+  subscribedAt: { type: Date, default: Date.now },
+});
+
+const Subscription = mongoose.model('Subscription', subscriptionSchema);
 
 // GET job details
 app.get('/job-details', async (req, res) => {
@@ -52,30 +71,29 @@ app.get('/api/jobs', async (req, res) => {
   }
 });
 
-// POST subscription email
-app.post('/api/subscribe', async (req, res) => {
-  const { email } = req.body;
-  if (!email) return res.status(400).json({ error: 'Email is required' });
+// POST subscription (updated to store in MongoDB)
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.EMAIL_USER,      
-      pass: process.env.EMAIL_PASS        
-    }
-  });
+app.post('/api/subscribe', async (req, res) => {
+  const { email, query } = req.body;
+  if (!email || !query) return res.status(400).json({ error: 'Email and job query are required' });
 
   try {
-    await transporter.sendMail({
-      from: `"Dream Job" <${process.env.EMAIL_USER}>`,
-      to: email, 
-      subject: "You've subscribed to job alerts!",
-      text: `Thanks for subscribing to Dream Job alerts! We'll notify you with updates.`,
+    // ✅ Save subscription in DB
+    await Subscription.create({ email, query });
+
+    // ✅ Send welcome email
+    await resend.emails.send({
+      from: 'Dream Job <onboarding@resend.dev>',
+      to: email,
+      subject: 'You’ve subscribed to job alerts!',
+      text: `Thanks for subscribing to Dream Job alerts for "${query}". You'll be notified about future updates.`,
     });
-    res.json({ message: 'Subscription confirmed. Email sent.' });
+
+    res.json({ message: 'Subscription confirmed. Email sent and stored.' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to send email' });
+    console.error('Resend email error:', error);
+    res.status(500).json({ error: 'Failed to send email or store subscription' });
   }
 });
 
