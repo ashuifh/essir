@@ -66,7 +66,7 @@ const App = () => {
           <div className="flex items-center justify-center mb-4">
             <Sparkles className="w-8 h-8 mr-2 text-blue-500" />
             <h1 className="text-6xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-500">
-              Dream Job
+              OpportuneX
             </h1>
             <Sparkles className="w-8 h-8 ml-2 text-purple-500" />
           </div>
