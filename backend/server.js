@@ -10,23 +10,34 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-// CORS Configuration
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://essir-voxe.vercel.app',
+];
+
 app.use(cors({
-  origin: 'https://essir-voxe.vercel.app',
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like Postman) or if origin is in allowed list
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 }));
 
 app.use(express.json());
 
-// MongoDB Connection
+// MongoDB connection
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log('MongoDB connected'))
-.catch((err) => console.error('MongoDB connection error:', err));
+.then(() => console.log(' MongoDB connected'))
+.catch((err) => console.error(' MongoDB error:', err));
 
-// MongoDB Schema
+// Mongoose Schema
 const subscriptionSchema = new mongoose.Schema({
   email: { type: String, required: true },
   query: { type: String, required: true },
@@ -34,15 +45,6 @@ const subscriptionSchema = new mongoose.Schema({
 });
 
 const Subscription = mongoose.model('Subscription', subscriptionSchema);
-
-// Nodemailer Transporter Configuration
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.GMAIL_EMAIL, // ayushkalakoti3@gmail.com
-    pass: process.env.GMAIL_APP_PASSWORD, // Google App Password (2FA enabled)
-  },
-});
 
 // Job Details Route
 app.get('/job-details', async (req, res) => {
@@ -86,37 +88,44 @@ app.get('/api/jobs', async (req, res) => {
   }
 });
 
-// Subscribe Route with Nodemailer
+// Subscribe Route
 app.post('/api/subscribe', async (req, res) => {
   const { email, query } = req.body;
   if (!email || !query) return res.status(400).json({ error: 'Email and job query are required' });
 
   try {
-    // Save subscription in DB
+    // Save to DB
     await Subscription.create({ email, query });
 
-    // Send confirmation email using Nodemailer
+    // Nodemailer - Gmail setup
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
     await transporter.sendMail({
-      from: '"Dream Job" <ayushkalakoti3@gmail.com>',
+      from: `"Dream Job Alerts" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: 'You’ve subscribed to job alerts!',
       text: `Thanks for subscribing to Dream Job alerts for "${query}". You'll be notified about future updates.`,
-      html: `<p>Thanks for subscribing to Dream Job alerts for <strong>"${query}"</strong>. You'll be notified about future updates.</p>`,
     });
 
     res.json({ message: 'Subscription confirmed. Email sent and stored.' });
   } catch (error) {
-    console.error('Nodemailer error:', error);
+    console.error('Email error:', error);
     res.status(500).json({ error: 'Failed to send email or store subscription' });
+
   }
 });
 
 // Root route
 app.get('/', (req, res) => {
-  res.send('Dream Job API is running!');
+  res.send(' Dream Job API is running!');
 });
 
-// Start Server
 app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+  console.log(` Server running at http://localhost:${port}`);
 });
