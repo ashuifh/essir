@@ -16,7 +16,7 @@ interface Job {
   apply_options?: { apply_link: string }[];
 }
 
-const BASE_URL = 'https://essir-13.onrender.com';
+const BASE_URL = 'https://essir-15.onrender.com';
 
 const App = () => {
   const [query, setQuery] = useState('');
