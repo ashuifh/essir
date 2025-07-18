@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Search, MapPin, Building2, ExternalLink, X, Mail, Sparkles } from 'lucide-react';
 
-const BASE_URL = 'https://essir-7.onrender.com'; // 👈 Your backend URL
+const BASE_URL = 'https://essir-7.onrender.com'; // your backend URL
 
 const App = () => {
   const [query, setQuery] = useState('');
