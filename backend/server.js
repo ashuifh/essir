@@ -11,7 +11,8 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 const allowedOrigins = [
-  'https://essir-1h5o.vercel.app'
+  'https://essir-1h5o.vercel.app',
+  'https://essir-ryjf.vercel.app'
 ];
 
 
