@@ -5,10 +5,8 @@ Built with React on the frontend and Node.js/Express on the backend, powered by 
 
 ---
 
-## 🚀 Live Demo & API
-
-- **Frontend (Live):** [https://essir-voxe.vercel.app/](https://essir-voxe.vercel.app/)  
-- **Backend API (Live):** [https://essir-8.onrender.com/](https://essir-8.onrender.com/)
+## 🚀 Live Demo -
+https://essir-ryjf.vercel.app/
 
 ---
 
